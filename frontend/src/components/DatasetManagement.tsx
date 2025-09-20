@@ -26,7 +26,7 @@ const DatasetManagement = () => {
   const fetchDatasets = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:8001/api/datasets/')
+      const response = await fetch('/api/datasets/')
       if (response.ok) {
         const data = await response.json()
         setDatasets(data.data || [])
@@ -46,7 +46,7 @@ const DatasetManagement = () => {
 
   const handleUploadFile = (datasetId: string) => {
     // 检查是否已配置Dify连接
-    fetch('http://localhost:8001/api/config/')
+    fetch('/api/config/')
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -80,7 +80,7 @@ const DatasetManagement = () => {
     formData.append('indexing_technique', 'high_quality')
 
     try {
-      const response = await fetch(`http://localhost:8001/api/datasets/${currentDatasetId}/files`, {
+      const response = await fetch(`/api/datasets/${currentDatasetId}/files`, {
         method: 'POST',
         body: formData
       })
@@ -132,7 +132,7 @@ const DatasetManagement = () => {
     formData.append('indexing_technique', 'high_quality')
 
     try {
-      const response = await fetch(`http://localhost:8001/api/datasets/${currentDatasetId}/files`, {
+      const response = await fetch(`/api/datasets/${currentDatasetId}/files`, {
         method: 'POST',
         body: formData
       })
@@ -157,7 +157,7 @@ const DatasetManagement = () => {
 
   const handleDeleteDataset = async (datasetId: string) => {
     try {
-      const response = await fetch(`http://localhost:8001/api/datasets/${datasetId}`, {
+      const response = await fetch(`/api/datasets/${datasetId}`, {
         method: 'DELETE'
       })
 
@@ -225,7 +225,6 @@ const DatasetManagement = () => {
     <div>
       <Card
         title="知识库管理"
-        bordered={false}
         extra={
           <Button
             type="primary"

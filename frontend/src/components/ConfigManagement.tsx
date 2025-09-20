@@ -20,7 +20,7 @@ const ConfigManagement = () => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch('http://localhost:8001/api/config/')
+      const response = await fetch('/api/config/')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -40,7 +40,7 @@ const ConfigManagement = () => {
 
   const handleSave = async (values: any) => {
     try {
-      const response = await fetch('http://localhost:8001/api/config/', {
+      const response = await fetch('/api/config/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const ConfigManagement = () => {
   const testConnection = async () => {
     setTesting(true)
     try {
-      const response = await fetch('http://localhost:8001/api/config/test')
+      const response = await fetch('/api/config/test')
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
@@ -88,7 +88,7 @@ const ConfigManagement = () => {
 
   return (
     <div>
-      <Card title="Dify配置管理" bordered={false}>
+      <Card title="Dify配置管理">
         {config && !config.configured && (
           <Alert
             message="请先配置Dify连接信息"
@@ -104,7 +104,7 @@ const ConfigManagement = () => {
           layout="vertical"
           onFinish={handleSave}
           initialValues={{
-            base_url: 'https://api.dify.ai/v1',
+            base_url: 'http://localhost:8091/',
             api_key: ''
           }}
         >
@@ -113,7 +113,7 @@ const ConfigManagement = () => {
             name="base_url"
             rules={[{ required: true, message: '请输入API地址' }]}
           >
-            <Input placeholder="https://api.dify.ai/v1" />
+            <Input placeholder="http://localhost:8091/" />
           </Form.Item>
 
           <Form.Item
