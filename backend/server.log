@@ -1,0 +1,54 @@
+INFO:     Started server process [4251]
+INFO:     Waiting for application startup.
+2025-09-20 10:00:25,920 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:00:25,920 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("dify_config")
+2025-09-20 10:00:25,920 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-09-20 10:00:25,921 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("ai_models")
+2025-09-20 10:00:25,921 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-09-20 10:00:25,921 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+2025-09-20 10:00:40,845 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:00:40,847 INFO sqlalchemy.engine.Engine SELECT dify_config.id AS dify_config_id, dify_config.base_url AS dify_config_base_url, dify_config.api_key AS dify_config_api_key, dify_config.created_at AS dify_config_created_at, dify_config.updated_at AS dify_config_updated_at 
+FROM dify_config 
+WHERE dify_config.id = ?
+ LIMIT ? OFFSET ?
+2025-09-20 10:00:40,847 INFO sqlalchemy.engine.Engine [generated in 0.00017s] ('default', 1, 0)
+2025-09-20 10:00:40,847 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59593 - "GET /api/config/ HTTP/1.1" 200 OK
+2025-09-20 10:08:17,609 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:08:17,610 INFO sqlalchemy.engine.Engine SELECT dify_config.id AS dify_config_id, dify_config.base_url AS dify_config_base_url, dify_config.api_key AS dify_config_api_key, dify_config.created_at AS dify_config_created_at, dify_config.updated_at AS dify_config_updated_at 
+FROM dify_config 
+WHERE dify_config.id = ?
+ LIMIT ? OFFSET ?
+2025-09-20 10:08:17,611 INFO sqlalchemy.engine.Engine [cached since 456.8s ago] ('default', 1, 0)
+2025-09-20 10:08:17,612 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:60966 - "GET /api/config/ HTTP/1.1" 200 OK
+2025-09-20 10:11:37,743 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:11:37,743 INFO sqlalchemy.engine.Engine SELECT dify_config.id AS dify_config_id, dify_config.base_url AS dify_config_base_url, dify_config.api_key AS dify_config_api_key, dify_config.created_at AS dify_config_created_at, dify_config.updated_at AS dify_config_updated_at 
+FROM dify_config 
+WHERE dify_config.id = ?
+ LIMIT ? OFFSET ?
+2025-09-20 10:11:37,743 INFO sqlalchemy.engine.Engine [cached since 656.9s ago] ('default', 1, 0)
+2025-09-20 10:11:37,747 INFO sqlalchemy.engine.Engine INSERT INTO dify_config (id, base_url, api_key, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING created_at, updated_at
+2025-09-20 10:11:37,747 INFO sqlalchemy.engine.Engine [generated in 0.00027s] ('default', 'https://api.dify.ai/v1', 'test-api-key-123')
+2025-09-20 10:11:37,748 INFO sqlalchemy.engine.Engine COMMIT
+2025-09-20 10:11:37,750 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:11:37,751 INFO sqlalchemy.engine.Engine SELECT dify_config.id, dify_config.base_url, dify_config.api_key, dify_config.created_at, dify_config.updated_at 
+FROM dify_config 
+WHERE dify_config.id = ?
+2025-09-20 10:11:37,751 INFO sqlalchemy.engine.Engine [generated in 0.00009s] ('default',)
+2025-09-20 10:11:37,751 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:61696 - "POST /api/config/ HTTP/1.1" 200 OK
+2025-09-20 10:11:37,755 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-09-20 10:11:37,756 INFO sqlalchemy.engine.Engine SELECT dify_config.id AS dify_config_id, dify_config.base_url AS dify_config_base_url, dify_config.api_key AS dify_config_api_key, dify_config.created_at AS dify_config_created_at, dify_config.updated_at AS dify_config_updated_at 
+FROM dify_config 
+WHERE dify_config.id = ?
+ LIMIT ? OFFSET ?
+2025-09-20 10:11:37,756 INFO sqlalchemy.engine.Engine [cached since 656.9s ago] ('default', 1, 0)
+2025-09-20 10:11:38,840 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:61698 - "GET /api/config/test HTTP/1.1" 500 Internal Server Error
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4251]

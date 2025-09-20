@@ -1,0 +1,30 @@
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    environment:
+      - DIFY_BASE_URL=${DIFY_BASE_URL:-https://api.dify.ai/v1}
+      - DIFY_API_KEY=${DIFY_API_KEY:-}
+      - DATABASE_URL=sqlite+aiosqlite:///./dify_studio.db
