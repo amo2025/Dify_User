@@ -30,8 +30,9 @@ async def get_datasets(
 
         dify_client.base_url = config.base_url
         dify_client.api_key = config.api_key
-        # 对于数据集操作，使用数据集API密钥
-        dify_client.data_api_key = config.api_key
+        # 对于数据集操作，使用数据集API密钥（优先使用环境变量中的配置）
+        import os
+        dify_client.data_api_key = os.getenv("DIFY_DATASET_API_KEY", config.api_key)
 
         params = {"page": page, "limit": limit}
         if keyword:

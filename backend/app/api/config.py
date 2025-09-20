@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -15,9 +16,9 @@ def get_config(db: Session = Depends(get_db)):
 
     if not config:
         return {
-            "base_url": "https://api.dify.ai/v1",
-            "api_key": "",
-            "configured": False
+            "base_url": os.getenv("DIFY_BASE_URL", "https://api.dify.ai/v1"),
+            "api_key": os.getenv("DIFY_API_KEY", ""),
+            "configured": bool(os.getenv("DIFY_API_KEY"))
         }
 
     return {
@@ -70,8 +71,8 @@ async def test_connection(db: Session = Depends(get_db)):
     try:
         dify_client.base_url = config.base_url
         dify_client.api_key = config.api_key
-        # 对于数据集操作，使用数据集API密钥
-        dify_client.data_api_key = config.api_key
+        # 对于数据集操作，使用数据集API密钥（优先使用环境变量中的配置）
+        dify_client.data_api_key = os.getenv("DIFY_DATASET_API_KEY", config.api_key)
 
         # 测试获取知识库列表
         response = await dify_client.get_datasets(limit=1)
@@ -81,7 +82,9 @@ async def test_connection(db: Session = Depends(get_db)):
             "data": response
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"连接测试失败: {str(e)}")
+        import traceback
+        error_detail = f"连接测试失败: {str(e)}\n{traceback.format_exc()}"
+        raise HTTPException(status_code=500, detail=error_detail)
     finally:
         # 恢复原始配置
         dify_client.base_url = original_base_url

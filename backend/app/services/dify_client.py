@@ -7,7 +7,7 @@ class DifyClient:
     def __init__(self):
         self.base_url = os.getenv("DIFY_BASE_URL", "https://api.dify.ai/v1")
         self.api_key = os.getenv("DIFY_API_KEY")
-        self.data_api_key = os.getenv("DIFY_DATA_API_KEY", self.api_key)
+        self.data_api_key = os.getenv("DIFY_DATASET_API_KEY", self.api_key)
         self.client = httpx.AsyncClient()
 
     async def _make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
@@ -109,5 +109,11 @@ class DifyClient:
     async def close(self):
         await self.client.aclose()
 
-# 全局Dify客户端实例
-dify_client = DifyClient()
+# 全局Dify客户端实例（延迟初始化）
+def get_dify_client():
+    """获取Dify客户端实例，确保环境变量已加载"""
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path="/Volumes/Users/dev/qoder/Dify_User/.env")
+    return DifyClient()
+
+dify_client = get_dify_client()

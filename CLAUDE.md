@@ -32,8 +32,14 @@ venv\\Scripts\\activate  # Windows
 # 安装依赖
 pip install -r requirements.txt
 
+# 安装开发依赖（可选）
+pip install -r requirements-dev.txt  # 如果有的话
+
 # 启动开发服务器
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# 生成新的 requirements.txt（当添加新依赖时）
+pip freeze > requirements.txt
 
 # 访问 API 文档
 # http://localhost:8000/docs
@@ -73,8 +79,14 @@ docker-compose down
 ### 核心 API 端点
 - `GET /api/models` - 获取 AI 模型列表
 - `POST /api/workflows` - 创建工作流
+- `GET /api/workflows/{id}` - 获取工作流详情
+- `POST /api/workflows/run` - 执行工作流
 - `GET/POST /api/datasets` - 知识库管理
-- `GET /api/config` - 系统配置
+- `GET /api/datasets/{id}/documents` - 获取知识库文档列表
+- `POST /api/datasets/{id}/documents` - 添加文档到知识库
+- `GET /api/config` - 获取系统配置
+- `POST /api/config` - 更新系统配置
+- `GET /api/config/test` - 测试 Dify API 连接
 
 ## 环境配置
 
@@ -97,6 +109,8 @@ ALLOWED_ORIGINS=http://localhost:3000
 2. **CORS**: 前端运行在端口 3000，后端在端口 8000
 3. **API 代理**: 后端代理所有 Dify API 调用，保护 API 密钥
 4. **错误处理**: 统一的异常处理在 `app/utils/error_handler.py`
+5. **环境变量**: 使用 `.env` 文件管理敏感配置，确保不提交到版本控制
+6. **API 密钥管理**: 工作流和数据集使用不同的 API 密钥，通过环境变量配置
 
 ## 测试
 

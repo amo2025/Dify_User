@@ -40,7 +40,7 @@ const ModelManagement = () => {
   const fetchModels = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:8001/api/models/')
+      const response = await fetch('/api/models/')
       const data = await response.json()
       setModels(data)
     } catch (error) {
@@ -67,7 +67,7 @@ const ModelManagement = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8001/api/models/${id}`, {
+      const response = await fetch(`/api/models/${id}`, {
         method: 'DELETE'
       })
 
@@ -85,8 +85,8 @@ const ModelManagement = () => {
   const handleSubmit = async (values: any) => {
     try {
       const url = editingModel
-        ? `http://localhost:8001/api/models/${editingModel.id}`
-        : 'http://localhost:8001/api/models/'
+        ? `/api/models/${editingModel.id}`
+        : '/api/models/'
 
       const method = editingModel ? 'PATCH' : 'POST'
 
@@ -166,7 +166,6 @@ const ModelManagement = () => {
     <div>
       <Card
         title="AI模型管理"
-        bordered={false}
         extra={
           <Button
             type="primary"
