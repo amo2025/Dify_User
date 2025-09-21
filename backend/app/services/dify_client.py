@@ -66,10 +66,12 @@ class DifyClient:
         }
 
         try:
-            # 创建multipart form数据
+            # 创建multipart form数据，按照Dify API要求格式
+            import json
             form_data = {}
-            for key, value in data.items():
-                form_data[key] = (None, str(value))
+
+            # 将元数据作为JSON字符串放在data字段中
+            form_data["data"] = (None, json.dumps(data))
 
             # 添加文件
             form_data.update(files)

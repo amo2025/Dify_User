@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Button, message, Alert, Space, Tag, Modal, Upload } from 'antd'
+import { Card, Table, Button, message, Alert, Space, Tag, Modal, Upload, Form, Input, Select } from 'antd'
+const { Option } = Select
 import { PlusOutlined, FileOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadFile, UploadProps } from 'antd'
 
@@ -15,9 +16,12 @@ const DatasetManagement = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([])
   const [loading, setLoading] = useState(false)
   const [uploadModalVisible, setUploadModalVisible] = useState(false)
+  const [createModalVisible, setCreateModalVisible] = useState(false)
   const [currentDatasetId, setCurrentDatasetId] = useState<string>('')
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [uploading, setUploading] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [form] = Form.useForm()
 
   useEffect(() => {
     fetchDatasets()
@@ -41,7 +45,62 @@ const DatasetManagement = () => {
   }
 
   const handleCreateDataset = () => {
-    message.info('创建知识库功能暂未实现')
+    // 检查是否已配置Dify连接
+    fetch('/api/config/')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        return response.json()
+      })
+      .then(config => {
+        if (config.configured) {
+          setCreateModalVisible(true)
+          form.resetFields()
+        } else {
+          message.info('请先配置Dify连接信息')
+        }
+      })
+      .catch(error => {
+        console.error('配置检查失败:', error)
+        message.info('请先配置Dify连接信息')
+      })
+  }
+
+  const handleConfirmCreate = async () => {
+    try {
+      const values = await form.validateFields()
+      setCreating(true)
+
+      const response = await fetch('/api/datasets/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: values.name,
+          description: values.description || '',
+          indexing_technique: values.indexing_technique || 'high_quality',
+          permission: values.permission || 'only_me',
+          provider: 'vendor'
+        })
+      })
+
+      if (response.ok) {
+        message.success('知识库创建成功')
+        setCreateModalVisible(false)
+        form.resetFields()
+        fetchDatasets() // 刷新知识库列表
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || '创建知识库失败')
+      }
+    } catch (error: any) {
+      console.error('创建知识库失败:', error)
+      message.error(error.message || '创建知识库失败')
+    } finally {
+      setCreating(false)
+    }
   }
 
   const handleUploadFile = (datasetId: string) => {
@@ -69,38 +128,6 @@ const DatasetManagement = () => {
       })
   }
 
-  const handleUpload = async (options: any) => {
-    const { file, onSuccess, onError } = options
-
-    setUploading(true)
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('process_rule', 'automatic')
-    formData.append('indexing_technique', 'high_quality')
-
-    try {
-      const response = await fetch(`/api/datasets/${currentDatasetId}/files`, {
-        method: 'POST',
-        body: formData
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        message.success('文件上传成功')
-        onSuccess(result, file)
-        setUploadModalVisible(false)
-        fetchDatasets() // 刷新知识库列表
-      } else {
-        throw new Error('文件上传失败')
-      }
-    } catch (error) {
-      message.error('文件上传失败')
-      onError(error)
-    } finally {
-      setUploading(false)
-    }
-  }
 
   const uploadProps: UploadProps = {
     onRemove: (file) => {
@@ -138,7 +165,7 @@ const DatasetManagement = () => {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        await response.json()
         message.success('文件上传成功')
         setUploadModalVisible(false)
         setFileList([])
@@ -147,9 +174,9 @@ const DatasetManagement = () => {
         const errorText = await response.text()
         throw new Error(errorText || '文件上传失败')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('上传失败:', error)
-      message.error('文件上传失败')
+      message.error(error.message || '文件上传失败')
     } finally {
       setUploading(false)
     }
@@ -194,7 +221,7 @@ const DatasetManagement = () => {
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString(),
     },
     {
       title: '操作',
@@ -299,6 +326,77 @@ const DatasetManagement = () => {
             <strong>已选择文件:</strong> {fileList[0].name}
           </div>
         )}
+      </Modal>
+
+      {/* 创建知识库模态框 */}
+      <Modal
+        title="创建知识库"
+        open={createModalVisible}
+        onCancel={() => {
+          setCreateModalVisible(false)
+          form.resetFields()
+        }}
+        footer={[
+          <Button key="cancel" onClick={() => {
+            setCreateModalVisible(false)
+            form.resetFields()
+          }}>
+            取消
+          </Button>,
+          <Button
+            key="create"
+            type="primary"
+            loading={creating}
+            onClick={handleConfirmCreate}
+          >
+            {creating ? '创建中...' : '确认创建'}
+          </Button>
+        ]}
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            indexing_technique: 'high_quality',
+            permission: 'only_me'
+          }}
+        >
+          <Form.Item
+            name="name"
+            label="知识库名称"
+            rules={[{ required: true, message: '请输入知识库名称' }]}
+          >
+            <Input placeholder="请输入知识库名称" />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="描述"
+          >
+            <Input.TextArea placeholder="请输入知识库描述（可选）" rows={3} />
+          </Form.Item>
+
+          <Form.Item
+            name="indexing_technique"
+            label="索引技术"
+          >
+            <Select>
+              <Option value="high_quality">高质量索引</Option>
+              <Option value="economy">经济型索引</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="permission"
+            label="访问权限"
+          >
+            <Select>
+              <Option value="only_me">仅自己</Option>
+              <Option value="all_team_members">所有团队成员</Option>
+            </Select>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )

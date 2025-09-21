@@ -92,6 +92,24 @@ async def upload_file_to_dataset(
     db: Session = Depends(get_db)
 ):
     try:
+        # 获取数据库中的配置
+        from app.models.config import DifyConfig
+        config = db.query(DifyConfig).filter(DifyConfig.id == "default").first()
+
+        if not config or not config.api_key:
+            raise HTTPException(status_code=400, detail="请先配置Dify API密钥")
+
+        # 临时设置客户端配置
+        original_base_url = dify_client.base_url
+        original_api_key = dify_client.api_key
+        original_data_api_key = dify_client.data_api_key
+
+        dify_client.base_url = config.base_url
+        dify_client.api_key = config.api_key
+        # 对于数据集操作，使用数据集API密钥（优先使用环境变量中的配置）
+        import os
+        dify_client.data_api_key = os.getenv("DIFY_DATASET_API_KEY", config.api_key)
+
         # 读取文件内容
         file_content = await file.read()
 
@@ -99,12 +117,20 @@ async def upload_file_to_dataset(
         response = await dify_client.create_document_by_file(
             dataset_id=dataset_id,
             data={
-                "process_rule": process_rule,
                 "indexing_technique": indexing_technique,
+                "process_rule": {
+                    "mode": "automatic" if process_rule == "automatic" else "custom",
+                    "rules": {}
+                },
                 "original_url": ""
             },
             files={"file": (file.filename, file_content, file.content_type)}
         )
+
+        # 恢复原始配置
+        dify_client.base_url = original_base_url
+        dify_client.api_key = original_api_key
+        dify_client.data_api_key = original_data_api_key
 
         return {
             "message": "文件上传成功",
@@ -115,11 +141,21 @@ async def upload_file_to_dataset(
         }
 
     except httpx.HTTPStatusError as e:
+        # 确保异常时也恢复配置
+        if 'original_base_url' in locals() and 'original_api_key' in locals() and 'original_data_api_key' in locals():
+            dify_client.base_url = original_base_url
+            dify_client.api_key = original_api_key
+            dify_client.data_api_key = original_data_api_key
         raise HTTPException(
             status_code=e.response.status_code,
             detail=f"Dify文件上传失败: {e.response.text}"
         )
     except Exception as e:
+        # 确保异常时也恢复配置
+        if 'original_base_url' in locals() and 'original_api_key' in locals() and 'original_data_api_key' in locals():
+            dify_client.base_url = original_base_url
+            dify_client.api_key = original_api_key
+            dify_client.data_api_key = original_data_api_key
         raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
 
 @router.delete("/{dataset_id}/files/{document_id}")
