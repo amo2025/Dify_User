@@ -227,11 +227,12 @@ const DatasetManagement = () => {
       title: '操作',
       key: 'actions',
       render: (_: any, record: Dataset) => (
-        <Space>
+        <Space wrap style={{ maxWidth: '100%' }}>
           <Button
             size="small"
             icon={<FileOutlined />}
             onClick={() => handleUploadFile(record.id)}
+            style={{ marginBottom: 4 }}
           >
             上传文件
           </Button>
@@ -240,6 +241,7 @@ const DatasetManagement = () => {
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDeleteDataset(record.id)}
+            style={{ marginBottom: 4 }}
           >
             删除
           </Button>
